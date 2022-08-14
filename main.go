@@ -5,27 +5,19 @@ import (
 	"fmt"
 	"go-pubsub-server/commands"
 	"net"
+
+	"github.com/jiyeyuran/go-eventemitter"
 )
 
-/*
-	EventEmitter Start
-*/
-type EventEmitter map[string]chan string
-
-func NewEventEmitter() *EventEmitter {
-	return &EventEmitter{}
-}
-
-func (event_emitter EventEmitter) Server(con net.Conn) {
+func Server(con net.Conn, em eventemitter.IEventEmitter) {
 
 	client_content := NewClient()
-	client_content.ClientContainer(con, event_emitter)
+	err := client_content.ClientContainer(con, em)
 
+	if err != nil {
+		fmt.Println(err)
+	}
 }
-
-/*
-	EventEmitter End
-*/
 
 /*
 Client Start
@@ -38,7 +30,7 @@ func NewClient() *Client {
 	return &Client{}
 }
 
-func (client *Client) ClientContainer(client_connection net.Conn, event_emitter EventEmitter) error {
+func (client *Client) ClientContainer(client_connection net.Conn, em eventemitter.IEventEmitter) error {
 
 	defer client_connection.Close()
 	reader := bufio.NewReader(client_connection)
@@ -49,6 +41,7 @@ func (client *Client) ClientContainer(client_connection net.Conn, event_emitter 
 		if err != nil {
 			return err
 		}
+
 		result, err := commands.FindCommand(message)
 
 		if err != nil {
@@ -56,33 +49,26 @@ func (client *Client) ClientContainer(client_connection net.Conn, event_emitter 
 		}
 
 		if result.Subscribe.Cmd != "" {
-			client.Subscribe(client_connection, result.Subscribe.Event, event_emitter)
+			client.Subscribe(client_connection, result.Subscribe.Event, em)
 		}
 
 		if result.Publish.Cmd != "" {
-			client.Publish(result.Publish.Event, []byte(result.Publish.Message), event_emitter)
+			client.Publish(client_connection, result.Publish.Event, []byte(result.Publish.Message), em)
 		}
 	}
 
 }
 
-func (client *Client) Subscribe(client_connection net.Conn, event string, event_emitter EventEmitter) {
-	event_emitter[event] = make(chan string)
-
-	go func() {
-		for {
-			select {
-			case message := <-event_emitter[event]:
-				fmt.Println(message)
-				client_connection.Write([]byte(message))
-			}
-		}
-	}()
-
+func SendDataToClient(client_connection net.Conn, message string) {
+	client_connection.Write([]byte(message))
 }
 
-func (client *Client) Publish(event string, data []byte, event_emitter EventEmitter) {
-	event_emitter[event] <- string(data)
+func (client *Client) Subscribe(client_connection net.Conn, event string, em eventemitter.IEventEmitter) {
+	em.AddListener(event, SendDataToClient)
+}
+
+func (client *Client) Publish(client_connection net.Conn, event string, data []byte, em eventemitter.IEventEmitter) {
+	em.Emit(event, client_connection, string(data))
 }
 
 /*
@@ -96,7 +82,7 @@ func main() {
 	}
 
 	defer listener.Close()
-	event_emitter := NewEventEmitter()
+	em := eventemitter.NewEventEmitter()
 
 	for {
 		con, err := listener.Accept()
@@ -104,6 +90,6 @@ func main() {
 			panic(err)
 		}
 
-		go event_emitter.Server(con)
+		go Server(con, em)
 	}
 }
