@@ -59,12 +59,16 @@ func (client *Client) ClientContainer(client_connection net.Conn, em eventemitte
 
 }
 
-func SendDataToClient(client_connection net.Conn, message string) {
-	client_connection.Write([]byte(message))
-}
+// func (client *Client) SendDataToClient(client_connection net.Conn, message string) {
+// 	print("geldi")
+// 	client_connection.Write([]byte(message))
+// }
 
 func (client *Client) Subscribe(client_connection net.Conn, event string, em eventemitter.IEventEmitter) {
-	em.AddListener(event, SendDataToClient)
+	em.On(event, func(client_connection net.Conn, message string) {
+		print("geldi")
+		client_connection.Write([]byte(message))
+	})
 }
 
 func (client *Client) Publish(client_connection net.Conn, event string, data []byte, em eventemitter.IEventEmitter) {

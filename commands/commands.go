@@ -30,7 +30,7 @@ type Commands struct {
 func FetchSubscribeCommand(data []string) (SubscribeResponse, error) {
 
 	if len(data) != 2 {
-		return SubscribeResponse{}, errors.New("Subscribe Protocol Error !")
+		return SubscribeResponse{}, errors.New("subscribe protocol error")
 	}
 
 	return SubscribeResponse{
@@ -43,7 +43,7 @@ func FetchSubscribeCommand(data []string) (SubscribeResponse, error) {
 func FetchPublishCommand(data []string) (PublishResponse, error) {
 
 	if len(data) != 3 {
-		return PublishResponse{}, errors.New("Publish Protocol Error !")
+		return PublishResponse{}, errors.New("publish protocol error")
 	}
 
 	return PublishResponse{
@@ -58,7 +58,7 @@ func FindCommand(messages string) (Commands, error) {
 	command_messages := strings.Split(messages, ":")
 
 	if len(command_messages) == 0 {
-		return Commands{}, errors.New("Protocol Error !")
+		return Commands{}, errors.New("protocol error")
 	}
 
 	switch command_messages[0] {
@@ -85,7 +85,7 @@ func FindCommand(messages string) (Commands, error) {
 		}, nil
 
 	default:
-		return Commands{}, errors.New("Protocol Error")
+		return Commands{}, errors.New("protocol error")
 	}
 
 }
