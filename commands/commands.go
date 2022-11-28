@@ -28,20 +28,18 @@ type Commands struct {
 
 //data -> SUB:Event
 func FetchSubscribeCommand(data []string) (SubscribeResponse, error) {
-
 	if len(data) != 2 {
 		return SubscribeResponse{}, errors.New("subscribe protocol error")
 	}
 
 	return SubscribeResponse{
-		Cmd:   Publish,
+		Cmd:   Subscribe,
 		Event: data[1],
 	}, nil
 }
 
 //data -> PUB:Event:Data
 func FetchPublishCommand(data []string) (PublishResponse, error) {
-
 	if len(data) != 3 {
 		return PublishResponse{}, errors.New("publish protocol error")
 	}
@@ -54,7 +52,6 @@ func FetchPublishCommand(data []string) (PublishResponse, error) {
 }
 
 func FindCommand(messages string) (Commands, error) {
-
 	command_messages := strings.Split(messages, ":")
 
 	if len(command_messages) == 0 {
