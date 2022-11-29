@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"go-pubsub-server/client"
 	"net"
 
@@ -23,18 +22,7 @@ func main() {
 			panic(err)
 		}
 
-		go Server(con, em)
+		new_client := client.Client{}
+		go new_client.NewClient(con, em)
 	}
-}
-
-func Server(con net.Conn, em eventemitter.IEventEmitter) {
-	client_content := client.Client{}
-
-	go func() {
-		err := client_content.ClientContainer(con, em)
-
-		if err != nil {
-			fmt.Println(err)
-		}
-	}()
 }

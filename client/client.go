@@ -11,6 +11,16 @@ import (
 
 type Client struct{}
 
+func (client *Client) NewClient(con net.Conn, em eventemitter.IEventEmitter) {
+	go func() {
+		err := client.ClientContainer(con, em)
+
+		if err != nil {
+			fmt.Println(err)
+		}
+	}()
+}
+
 func (client *Client) ClientContainer(client_connection net.Conn, em eventemitter.IEventEmitter) error {
 	defer client_connection.Close()
 
