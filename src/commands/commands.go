@@ -2,7 +2,7 @@ package commands
 
 import (
 	"errors"
-	"go-pubsub-server/constants"
+	"go-pubsub-server/src/constants"
 	"strings"
 )
 

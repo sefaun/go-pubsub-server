@@ -3,8 +3,8 @@ package client
 import (
 	"bufio"
 	"fmt"
-	"go-pubsub-server/commands"
-	"go-pubsub-server/utils"
+	"go-pubsub-server/src/commands"
+	"go-pubsub-server/src/utils"
 	"net"
 
 	"github.com/jiyeyuran/go-eventemitter"

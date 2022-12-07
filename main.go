@@ -1,7 +1,7 @@
 package main
 
 import (
-	"go-pubsub-server/client"
+	"go-pubsub-server/src/client"
 	"net"
 
 	"github.com/jiyeyuran/go-eventemitter"
