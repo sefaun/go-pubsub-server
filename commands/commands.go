@@ -34,7 +34,7 @@ func FetchSubscribeCommand(data []string) (SubscribeResponse, error) {
 
 	return SubscribeResponse{
 		Cmd:   Subscribe,
-		Event: data[1],
+		Event: strings.Trim(data[1], "\n\r"),
 	}, nil
 }
 
@@ -47,7 +47,7 @@ func FetchPublishCommand(data []string) (PublishResponse, error) {
 	return PublishResponse{
 		Cmd:     Publish,
 		Event:   data[1],
-		Message: data[2],
+		Message: strings.Trim(data[2], "\n\r"),
 	}, nil
 }
 

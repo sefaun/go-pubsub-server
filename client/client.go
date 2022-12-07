@@ -9,11 +9,17 @@ import (
 	"github.com/jiyeyuran/go-eventemitter"
 )
 
-type Client struct{}
+type Client struct {
+	client_con net.Conn
+	client_em  eventemitter.IEventEmitter
+}
 
 func (client *Client) NewClient(con net.Conn, em eventemitter.IEventEmitter) {
+	client.client_con = con
+	client.client_em = em
+
 	go func() {
-		err := client.ClientContainer(con, em)
+		err := client.ClientContainer()
 
 		if err != nil {
 			fmt.Println(err)
@@ -21,48 +27,44 @@ func (client *Client) NewClient(con net.Conn, em eventemitter.IEventEmitter) {
 	}()
 }
 
-func (client *Client) ClientContainer(client_connection net.Conn, em eventemitter.IEventEmitter) error {
-	defer client_connection.Close()
-
-	reader := bufio.NewReader(client_connection)
+func (client *Client) ClientContainer() error {
+	defer client.client_con.Close()
+	reader := bufio.NewReader(client.client_con)
 
 	for {
 		message, err := reader.ReadString('\n')
-
 		if err != nil {
 			return err
 		}
 
 		result, err := commands.FindCommand(message)
-
 		if err != nil {
 			return err
 		}
 
 		if result.Subscribe.Cmd != "" {
 			fmt.Printf("cmd: %s - event: %s", result.Subscribe.Cmd, result.Subscribe.Event)
-			client.Subscribe(client_connection, result.Subscribe.Event, em)
+			client.Subscribe(result.Subscribe.Event)
 		}
 
 		if result.Publish.Cmd != "" {
 			fmt.Printf("cmd: %s - event: %s - message: %s", result.Publish.Cmd, result.Publish.Event, result.Publish.Message)
-			client.Publish(client_connection, result.Publish.Event, []byte(result.Publish.Message), em)
+			client.Publish(result.Publish.Event, []byte(result.Publish.Message))
 		}
 	}
 
 }
 
-func (client *Client) SendDataToClient(client_connection net.Conn, message string) {
-	print("sending data")
-	client_connection.Write([]byte(message))
+func (client *Client) SendDataToClient(message string) {
+	client.client_con.Write([]byte(message))
 }
 
-func (client *Client) Subscribe(client_connection net.Conn, event string, em eventemitter.IEventEmitter) {
-	em.On(event, func(client_connection net.Conn, message string) {
-		client.SendDataToClient(client_connection, message)
+func (client *Client) Subscribe(event string) {
+	client.client_em.On(event, func(message string) {
+		client.SendDataToClient(message)
 	})
 }
 
-func (client *Client) Publish(client_connection net.Conn, event string, data []byte, em eventemitter.IEventEmitter) {
-	em.Emit(event, client_connection, string(data))
+func (client *Client) Publish(event string, data []byte) {
+	client.client_em.Emit(event, string(data))
 }
