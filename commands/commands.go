@@ -2,6 +2,7 @@ package commands
 
 import (
 	"errors"
+	"go-pubsub-server/constants"
 	"strings"
 )
 
@@ -34,7 +35,7 @@ func FetchSubscribeCommand(data []string) (SubscribeResponse, error) {
 
 	return SubscribeResponse{
 		Cmd:   Subscribe,
-		Event: strings.Trim(data[1], "\n\r"),
+		Event: strings.Trim(data[1], constants.TerminatingCharacter),
 	}, nil
 }
 
@@ -47,7 +48,7 @@ func FetchPublishCommand(data []string) (PublishResponse, error) {
 	return PublishResponse{
 		Cmd:     Publish,
 		Event:   data[1],
-		Message: strings.Trim(data[2], "\n\r"),
+		Message: strings.Trim(data[2], constants.TerminatingCharacter),
 	}, nil
 }
 
