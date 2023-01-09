@@ -26,12 +26,12 @@ func (client *Client) NewClient(con net.Conn, em eventemitter.IEventEmitter) {
 		if err != nil {
 			fmt.Println(err)
 			client.clearClientEventEmitterDatas()
+			defer client.client_con.Close()
 		}
 	}()
 }
 
 func (client *Client) ClientContainer() error {
-	defer client.client_con.Close()
 	reader := bufio.NewReader(client.client_con)
 
 	for {
